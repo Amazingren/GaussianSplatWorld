@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="media/icon.png" type="image/png">
+    <title>ShapeSplat: A Large-scale Dataset of Gaussian Splats and Their Self-Supervised Pretraining</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #FAF9F6;
+            color: #333;
+            scroll-behavior: smooth;
+        }
+        .header-video {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+        }
+        .header-video video {
+            width: 100%;
+            height: auto;
+            opacity: 0;
+            transition: opacity 2s ease-in-out;
+        }
+        .header-video video.loaded {
+            opacity: 1;
+        }
+        .content {
+            display: flex;
+            flex-direction: row; /* Set flex direction for desktop */
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 2s ease-in-out;
+        }
+        .content.visible {
+            opacity: 1;
+        }
+        .toc-wrapper {
+            width: 20%;
+            padding-right: 2%; /* Responsive padding on the right of TOC */
+            padding-left: 5%; /* Responsive padding on the left of TOC */
+            box-sizing: border-box;
+            position: relative;
+            padding-top: 80px; /* Move the TOC further down */
+        }
+        .toc {
+            position: relative;
+            width: 100%;
+            height: auto;
+        }
+        .toc.fixed {
+            position: fixed;
+            top: 20px;
+            width: 20%;
+            height: auto;
+        }
+        .toc a {
+            display: block;
+            padding: 10px 0;
+            color: #2E5E7E;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .toc a:hover {
+            text-decoration: underline;
+        }
+        .main-content {
+            width: 70%; /* Adjusted to give more space for padding */
+            padding-left: 8%; /* Responsive space between TOC and content */
+            padding-right: 8%; /* Responsive padding on the right of content */
+            box-sizing: border-box;
+            border-left: 2px solid #e0e0e0;
+        }
+        .paper-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        .section {
+            margin-bottom: 40px;
+        }
+        .section h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .framework-image img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #e0e0e0;
+            padding: 10px;
+            background-color: #fff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .bibtex {
+            background-color: #f0f0f0;
+            padding: 15px 20px 5px 20px;
+            border-radius: 8px;
+            font-family: monospace;
+            overflow-x: auto;
+        }
+        .bibtex pre {
+            margin: 0;
+        }
+        .author-list a {
+            color: #4B9AE8;
+            text-decoration: none;
+        }
+        .author-list a:hover {
+            text-decoration: underline;
+        }
+        .vertical-divider {
+            width: 2px;
+            background-color: #e0e0e0;
+            height: 150px; /* Fixed height as a placeholder */
+            position: absolute;
+            left: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+        .toc.fixed + .vertical-divider {
+            position: fixed;
+            top: 20px;
+            height: 150px;
+            z-index: 1000;
+        }
+
+        /* Media Queries for Responsive Design */
+        @media (max-width: 768px) {
+            .content {
+                flex-direction: column; /* Stack TOC and content vertically */
+                padding: 10px;
+            }
+            
+            .toc-wrapper {
+                width: 100%;
+                padding-right: 0;
+                padding-left: 5%;
+                padding-top: 20px;
+            }
+            
+            .toc.fixed {
+                position: relative;
+                top: 0;
+                width: 100%;
+            }
+            
+            .main-content {
+                width: 100%;
+                padding-left: 0;
+                padding-right: 5%;
+                border-left: none;
+            }
+            
+            .paper-title {
+                font-size: 28px; /* Slightly smaller title on mobile */
+            }
+            
+            .section h2 {
+                font-size: 20px; /* Adjust section title size */
+            }
+            
+            .vertical-divider {
+                display: none; /* Hide the vertical divider on small screens */
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .paper-title {
+                font-size: 30px; /* Adjust title size for tablets */
+            }
+            
+            .section h2 {
+                font-size: 22px; /* Adjust section title size */
+            }
+            
+            .toc-wrapper {
+                padding-right: 3%; /* Slightly reduce padding on tablets */
+                padding-left: 8%; /* Add some padding on tablets */
+            }
+            
+            .main-content {
+                padding-left: 4%;
+                padding-right: 5%; /* Add some padding on tablets */
+            }
+        }
+        @media (min-width: 1200px) {
+            .toc-wrapper {
+                padding-left: 10%; /* Increase padding on the left for wide screens */
+            }
+
+            .main-content {
+                padding-left: 7%; /* Adjust main content padding to maintain balance */
+                padding-right: 11%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header-video">
+        <video id="demo-video" autoplay muted loop>
+            <source src="media/shapesplat_demo.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+
+    <div class="content" id="content">
+        <div class="toc-wrapper">
+            <div id="toc" class="toc">
+            <a href="#info">Info</a>
+            <a href="#abstract">Abstract</a> <!-- New Abstract link -->
+            <a href="#introduction">Presentation</a>
+            <a href="#framework">Framework</a>
+            <a href="#bibtex">Bibtex</a>
+        </div>
+            <div class="vertical-divider"></div>
+        </div>
+        <div class="main-content">
+            <div id="info" class="section">
+                <p class="paper-title">ShapeSplat: A Large-scale Dataset of Gaussian Splats and Their Self-Supervised Pretraining</p>
+                <p class="author-list"><strong>Authors:</strong> 
+                    <a href="https://qimaqi.github.io/" id="qi-ma"><sup>*</sup>Qi Ma<sup>1,2</sup></a>, 
+                    <a href="https://unique1i.github.io/" id="yue-li"><sup>*</sup>Yue Li<sup>3</sup></a>, 
+                    <a href="https://amazingren.github.io/" id="bin-ren"><sup>&#9993;</sup>Bin Ren<sup>2,4,5</sup></a>, 
+                    <a href="https://disi.unitn.it/~sebe/" id="nicu-sebe">Nicu Sebe<sup>5</sup></a>, 
+                    <a href="https://people.ee.ethz.ch/~kender/" id="ender-konukoglu">Ender Konukoglu<sup>1</sup></a>, 
+                    <a href="https://staff.science.uva.nl/th.gevers/" id="theo-gevers">Theo Gevers<sup>3</sup></a>, 
+                    <a href="https://insait.ai/prof-luc-van-gool/" id="luc-van-gool">Luc Van Gool<sup>1,2</sup></a>, 
+                    <a href="https://insait.ai/dr-danda-paudel/" id="danda-pani-paudel">Danda Pani Paudel<sup>2</sup></a>
+                </p>
+                <p><sup>*</sup>Indicates equal contribution, and <sup>&#9993;</sup> indicates corresponding author.</p>
+                <p><strong>Affiliations:</strong> <sup>1</sup>ETH Zürich, <sup>2</sup>INSAIT, <sup>3</sup>University of Amsterdam, <sup>4</sup>University of Pisa, <sup>5</sup>University of Trento</p>         
+                <p><strong style="vertical-align: middle;">Links:</strong>
+                    <a href="https://arxiv.org/abs/2408.10906" target="_blank" style="text-decoration: none; vertical-align: middle;">
+                        <img src="https://img.shields.io/badge/arXiv-2408.10906-blue?logo=arxiv&color=%23B31B1B" alt="arXiv Link" style="vertical-align: middle;">
+                    </a>
+                    <a href="https://github.com/qimaqi/ShapeSplats-Gaussian-MAE.git" target="_blank" style="text-decoration: none; vertical-align: middle;">
+                        <img src="https://img.shields.io/badge/GitHub-Repo-blue?logo=github" alt="GitHub Link" style="vertical-align: middle;">
+                    </a>
+                </p>
+            </div>
+            <div id="abstract" class="section">
+                <h2>Abstract</h2>
+                <p style="line-height: 1.5;"><strong>TL;DR:</strong> We present ShapeSplat dataset with our Gaussian-MAE method, enabling the masked pretraining directly on 3DGS parameters.</p>
+                            
+                <p>Our key contributions are as follows:</p>
+                    <ul style="line-height: 1.5;">
+                        <li><strong>ShapeSplat</strong>, a large-scale Gaussian splats dataset spanning 65K objects in 87 unique categories.</li>
+                        <li><strong>Gaussian-MAE</strong>, the masked autoencoder-based self-supervised pretraining for Gaussian splats.</li>
+                        <li>We propose novel Gaussian feature grouping with splats pooling layer during the embedding stage, which are tailored to the Gaussian parameters, enabling better reconstruction and downstream task performance.</li>
+                    </ul>
+            </div>
+            <div id="introduction" class="section">
+                <h2>Presentation</h2>
+                <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; height: auto;">
+                    <iframe src="https://www.youtube.com/embed/5TnfkO3WdMk?rel=0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen
+                            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+                    </iframe>
+                </div>
+            </div>
+            <div id="framework" class="section framework-image">
+                <h2>Framework</h2>
+                <img src="media/framework_image.png" alt="Framework Figure">
+            </div>
+            <div id="bibtex" class="section">
+                <h2>Bibtex</h2>
+                <div class="bibtex">
+                    <pre>
+@misc{ma2024shapesplat,
+      title={ShapeSplat: A Large-scale Dataset of Gaussian Splats and Their Self-Supervised Pretraining}, 
+      author={Qi Ma and Yue Li and Bin Ren and Nicu Sebe and Ender Konukoglu and Theo Gevers and Luc Van Gool and Danda Pani Paudel},
+      year={2024},
+      eprint={2408.10906},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
+      url={https://arxiv.org/abs/2408.10906}, 
+}
+                    </pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('demo-video').addEventListener('canplay', function() {
+            this.classList.add('loaded');
+            document.getElementById('content').classList.add('visible');
+        });
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const toc = document.querySelector(".toc");
+            const verticalDivider = document.querySelector(".vertical-divider");
+            const tocWrapper = document.querySelector(".toc-wrapper");
+
+            function handleScroll() {
+                const tocPosition = tocWrapper.getBoundingClientRect().top;
+
+                if (tocPosition <= 20) {
+                    toc.classList.add("fixed");
+                    verticalDivider.style.position = "fixed";
+                    verticalDivider.style.top = "20px";
+                } else {
+                    toc.classList.remove("fixed");
+                }
+            }
+
+            window.addEventListener("scroll", handleScroll);
+        });
+    </script>
+</body>
+</html>
